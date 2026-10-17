@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>zlist</title>
+    <link>https://github.com/kindlyops/zlist-releases/releases</link>
+    <description>zlist updates. Rewritten by generate_appcast on every release.</description>
+    <language>en</language>
+  </channel>
+</rss>
