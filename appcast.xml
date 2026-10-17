@@ -1,9 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
-  <channel>
-    <title>zlist</title>
-    <link>https://github.com/kindlyops/zlist-releases/releases</link>
-    <description>zlist updates. Rewritten by generate_appcast on every release.</description>
-    <language>en</language>
-  </channel>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>zlist</title>
+        <link>https://github.com/kindlyops/zlist-releases/releases</link>
+        <description>zlist updates. Rewritten by generate_appcast on every release.</description>
+        <language>en</language>
+        <item>
+            <title>0.1.0</title>
+            <pubDate>Sat, 17 Oct 2026 07:16:21 -0400</pubDate>
+            <link>https://github.com/kindlyops/zlist-releases/releases</link>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.1.0/zlist-0.1.0.zip" length="3109604" type="application/octet-stream" sparkle:edSignature="VkE7rveok/Gd9x98z5CO8Oh0A83kOinsXp3Ty05xegEF+7rFGHrV2F2xTlZBImBKr9Diq55mxjVmAX8YFLSJAA=="/>
+        </item>
+    </channel>
 </rss>
