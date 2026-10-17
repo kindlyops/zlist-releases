@@ -6,13 +6,25 @@
         <description>zlist updates. Rewritten by generate_appcast on every release.</description>
         <language>en</language>
         <item>
+            <title>0.2.0</title>
+            <pubDate>Sat, 17 Oct 2026 07:25:10 -0400</pubDate>
+            <link>https://github.com/kindlyops/zlist-releases/releases</link>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.2.0/zlist-0.2.0.zip" length="3114683" type="application/octet-stream" sparkle:edSignature="kSIjwRbhXyJr4y5fNkP+jlA87dvp11VElxpkBjhZaP7gusCVYWTyKCKM+wCKaKtnCuQxH3SM5oBx4YzM3U+SAg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.2.0/zlist7-6.delta" sparkle:deltaFrom="6" length="150090" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="uzLQcUBesRYxNjQbd41xg51oJYX10KRvBxv5bctPhxwCDELTfQNRyEzW1m6c2vHc86MukzDyTXjhse0guWT3BQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>0.1.0</title>
             <pubDate>Sat, 17 Oct 2026 07:16:21 -0400</pubDate>
             <link>https://github.com/kindlyops/zlist-releases/releases</link>
             <sparkle:version>6</sparkle:version>
             <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.1.0/zlist-0.1.0.zip" length="3109604" type="application/octet-stream" sparkle:edSignature="VkE7rveok/Gd9x98z5CO8Oh0A83kOinsXp3Ty05xegEF+7rFGHrV2F2xTlZBImBKr9Diq55mxjVmAX8YFLSJAA=="/>
+            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.2.0/zlist-0.1.0.zip" length="3109604" type="application/octet-stream" sparkle:edSignature="VkE7rveok/Gd9x98z5CO8Oh0A83kOinsXp3Ty05xegEF+7rFGHrV2F2xTlZBImBKr9Diq55mxjVmAX8YFLSJAA=="/>
         </item>
     </channel>
 </rss>
