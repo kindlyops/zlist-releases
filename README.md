@@ -51,6 +51,10 @@ meeting app can use the other parts of the screen.
 zlist has a sample playlist with title cards and color clips. To open it,
 click **Open Sample Playlist** in the empty cue list.
 
+The sample playlist also has a **Sync test** cue. Once each second, the
+picture flashes white and a beep starts. Play it in a test meeting. Make
+sure that you see each flash and hear each beep at the same time.
+
 ## Install zlist on a Mac
 
 zlist operates on macOS 14 or later, on Apple silicon and Intel Macs.
@@ -139,8 +143,9 @@ and sound from a cue to the meeting app on each platform.
 - A compositor draws one output frame on each tick of a fixed 30 Hz clock.
   It draws the playing cue. When no cue plays, it draws the camera. If the
   source has no new frame, the compositor sends the last frame again.
-- Fade to black (FTB) changes the picture to black in 0.5 seconds. FTB
-  also closes the microphone relay.
+- Fade to black (FTB) changes the picture to black in 0.5 seconds. In the
+  same 0.5 seconds, the sound of the cue fades out. FTB also closes the
+  microphone relay.
 - The microphone relay is open only when no cue with sound plays and the
   microphone is not muted. The gain changes in 50 ms, so you do not hear
   a click.
@@ -160,6 +165,11 @@ CoreMediaIO sink stream sends each frame to the zlist Camera system
 extension. The extension sends the frame to the meeting app on its source
 stream.
 
+A frame needs more time than the sound to get to the meeting app. Thus
+the compositor draws each frame 35 ms before its time. It stamps the
+frame with that time, and the extension keeps the stamp. The compositor
+takes the video frame that is nearest to that time.
+
 ```mermaid
 flowchart TB
     file["Video file"] --> player["AVPlayer"]
@@ -174,7 +184,7 @@ flowchart TB
     subgraph app["zlist app"]
         comp["Compositor<br/>30 Hz timer"] --> render["Core Image on Metal<br/>fit to 1920x1080, fade"]
         render --> preview["PROGRAM and PREVIEW monitors"]
-        render --> sink["Sink stream writer<br/>CMSampleBuffer, host time"]
+        render --> sink["Sink stream writer<br/>stamp = now + 35 ms"]
     end
 
     sink -->|"CMSimpleQueue, 3 frames,<br/>drop when full"| ext
@@ -199,19 +209,24 @@ gives silence, not old sound.
 
 `AVPlayer` plays the sound of a cue directly to the zlist Audio output.
 The microphone relay uses raw Core Audio IO procs. Its input IO proc
-writes the first channel of the microphone into a mono ring buffer in the
-app. The output IO proc reads that ring buffer, applies the gain, and
-writes to the zlist Audio output. The app ring buffer starts with 20 ms of
-silence and keeps a maximum of 250 ms. When the delay is longer, the
-relay removes the oldest samples. The Core Audio server adds the two
-outputs together before the driver writes them into its ring buffer.
+writes the first channel of the microphone into an elastic buffer in the
+app. The output IO proc reads that buffer, applies the gain, and writes
+to the zlist Audio output. The Core Audio server adds the two outputs
+together before the driver writes them into its ring buffer.
+
+The elastic buffer keeps the voice for a set delay. The microphone and
+zlist Audio have different clocks, so the buffer reads up to 1% faster
+or slower to keep the delay constant. It does not remove or repeat
+samples. While the camera is on air, the delay is the time that the
+camera picture needs to go out, between 20 and 300 ms. Thus the voice and
+the lips go out together.
 
 ```mermaid
 flowchart TB
     mic["Microphone<br/>set to 48 kHz"] --> inproc["Input IO proc<br/>first channel, mono"]
 
     subgraph app["zlist app"]
-        inproc --> appring["App ring buffer<br/>mono float, 20 to 250 ms"]
+        inproc --> appring["Elastic buffer<br/>delay = camera delay, 20 to 300 ms<br/>rate 1 ± 1% for clock drift"]
         appring --> outproc["Output IO proc<br/>gain with 50 ms ramp"]
         player["AVPlayer<br/>cue sound"]
         tap["Level meter IO proc"]
@@ -314,12 +329,16 @@ flowchart TB
 
 ### Timing
 
-zlist does not use one shared clock for sound and picture. The media
-player keeps the sound and the picture of a cue together. The compositor
-then takes the newest frame on its own 30 Hz clock, and the virtual camera
-sends frames on a different 30 Hz clock. These numbers are estimates from
-the design; zlist does not measure them:
+The media player keeps the sound and the picture of a cue together. On
+macOS, `sync-probe` in the zlist repository measures the result: it
+plays a clip with a flash and a beep, and records zlist Camera and zlist
+Audio in the same way as a meeting app. In three tests, the sound arrived
+between 17 ms before and 22 ms after the picture. Before the 35 ms lead,
+the sound arrived 55 to 64 ms before the picture.
 
-- The picture can be approximately one or two frames (33 to 67 ms) late.
-- The microphone relay adds approximately 20 to 250 ms on macOS and 60 to
-  500 ms on Windows.
+- On macOS, the remaining difference comes from the 30 Hz compositor
+  clock. It changes each time zlist starts, by a maximum of half a frame
+  (17 ms).
+- On Windows, the timing is not measured yet. The picture can be one or
+  two frames (33 to 67 ms) late, and the microphone relay adds
+  approximately 60 to 500 ms.
