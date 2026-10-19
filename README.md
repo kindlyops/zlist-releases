@@ -125,3 +125,201 @@ each file of the release.
 - The `gh-pages` branch has the Sparkle appcast at
   `https://kindlyops.github.io/zlist-releases/appcast.xml`. The Mac app
   reads this appcast to find updates.
+
+## How zlist plays video and sound
+
+This section is for technical readers. It shows how zlist moves pictures
+and sound from a cue to the meeting app on each platform.
+
+### Common rules
+
+- The virtual camera always sends 1920x1080 frames at 30 frames per
+  second. zlist fits each picture into that frame and fills the remainder
+  with black.
+- A compositor draws one output frame on each tick of a fixed 30 Hz clock.
+  It draws the playing cue. When no cue plays, it draws the camera. If the
+  source has no new frame, the compositor sends the last frame again.
+- Fade to black (FTB) changes the picture to black in 0.5 seconds. FTB
+  also closes the microphone relay.
+- The microphone relay is open only when no cue with sound plays and the
+  microphone is not muted. The gain changes in 50 ms, so you do not hear
+  a click.
+- Each platform plays the sound of a cue directly to the output device.
+  zlist does not mix the sound in the app.
+- When zlist is not open, the virtual camera sends a dark gray
+  placeholder frame. It does this also when no frame arrives for 0.5
+  seconds.
+
+### macOS video
+
+`AVPlayer` decodes the video file. The compositor reads the frame for the
+current host time from `AVPlayerItemVideoOutput`. Core Image on Metal
+scales the frame and applies the fade. The output buffers are IOSurface
+pixel buffers, so the preview monitors show them without a copy. A
+CoreMediaIO sink stream sends each frame to the zlist Camera system
+extension. The extension sends the frame to the meeting app on its source
+stream.
+
+```mermaid
+flowchart TB
+    file["Video file"] --> player["AVPlayer"]
+    player --> vout["AVPlayerItemVideoOutput<br/>32BGRA, IOSurface"]
+    still["Picture file"] --> image["ImageIO decode<br/>once per cue"]
+    cam["Camera"] --> capture["AVCaptureSession<br/>newest frame only"]
+
+    vout --> comp
+    image --> comp
+    capture -->|"when no cue plays"| comp
+
+    subgraph app["zlist app"]
+        comp["Compositor<br/>30 Hz timer"] --> render["Core Image on Metal<br/>fit to 1920x1080, fade"]
+        render --> preview["PROGRAM and PREVIEW monitors"]
+        render --> sink["Sink stream writer<br/>CMSampleBuffer, host time"]
+    end
+
+    sink -->|"CMSimpleQueue, 3 frames,<br/>drop when full"| ext
+
+    subgraph extension["zlist Camera system extension"]
+        ext["Sink stream"] --> source["Source stream<br/>1920x1080 BGRA, 30 fps"]
+        idle["Placeholder frame<br/>after 0.5 s without frames"] --> source
+    end
+
+    source --> zoom["Meeting app<br/>camera: zlist Camera"]
+```
+
+### macOS sound
+
+zlist Audio is a Core Audio driver (an AudioServerPlugIn). It has one
+output and one input. A ring buffer in the driver connects them. The
+ring buffer holds 1 second of 48 kHz stereo 32-bit float samples. Each slot
+holds a sample time stamp. The output side writes at the output sample
+time, and the input side reads at the input sample time. If a slot is
+empty or old, the input side reads silence. Thus an underrun or an overrun
+gives silence, not old sound.
+
+`AVPlayer` plays the sound of a cue directly to the zlist Audio output.
+The microphone relay uses raw Core Audio IO procs. Its input IO proc
+writes the first channel of the microphone into a mono ring buffer in the
+app. The output IO proc reads that ring buffer, applies the gain, and
+writes to the zlist Audio output. The app ring buffer starts with 20 ms of
+silence and keeps a maximum of 250 ms. When the delay is longer, the
+relay removes the oldest samples. The Core Audio server adds the two
+outputs together before the driver writes them into its ring buffer.
+
+```mermaid
+flowchart TB
+    mic["Microphone<br/>set to 48 kHz"] --> inproc["Input IO proc<br/>first channel, mono"]
+
+    subgraph app["zlist app"]
+        inproc --> appring["App ring buffer<br/>mono float, 20 to 250 ms"]
+        appring --> outproc["Output IO proc<br/>gain with 50 ms ramp"]
+        player["AVPlayer<br/>cue sound"]
+        tap["Level meter IO proc"]
+    end
+
+    outproc --> hal["Core Audio server<br/>adds the outputs together"]
+    player --> hal
+
+    subgraph driver["zlist Audio driver, in coreaudiod"]
+        hal --> write["WriteMix<br/>at output sample time"]
+        write --> ring["Ring buffer<br/>48000 frames = 1 s<br/>48 kHz, 2 ch, float32<br/>each slot has a time stamp"]
+        ring --> read["ReadInput<br/>at input sample time<br/>empty or old slot = silence"]
+    end
+
+    read --> zoom["Meeting app<br/>microphone: zlist Audio"]
+    read --> tap
+```
+
+### Windows video
+
+`MediaPlayer` from Windows.Media.Playback decodes the video file in frame
+server mode. The compositor copies the current frame into a Win2D render
+target on Direct3D 11. The compositor runs on its own thread with a
+high-resolution waitable timer. It fits the frame into 1920x1080 and draws
+the fade as a black layer. A GPU readback copies the frame to a staging
+texture. Then the app writes the frame into shared memory.
+
+The virtual camera is a Media Foundation media source in a DLL. The app
+registers it with `MFCreateVirtualCamera`. The Windows Camera Frame Server
+loads the DLL and sends its frames to the meeting app. The shared memory
+has three frame slots, so the writer and the reader never use the same
+slot. An event tells the DLL that a new frame is ready. The DLL sends a
+frame each 33.3 ms. It sends a new frame when one is available. Otherwise
+it sends the last frame again for a maximum of 0.5 seconds, and then the
+placeholder.
+
+```mermaid
+flowchart TB
+    file["Video file"] --> player["MediaPlayer<br/>frame server mode"]
+    still["Picture file"] --> image["Win2D bitmap<br/>decode once per cue"]
+    cam["Camera"] --> capture["MediaFrameReader<br/>or DirectShow sample grabber"]
+
+    player -->|"CopyFrameToVideoSurface"| comp
+    image --> comp
+    capture -->|"when no cue plays"| comp
+
+    subgraph app["zlist app"]
+        comp["Compositor thread<br/>30 Hz waitable timer"] --> draw["Win2D on Direct3D 11<br/>fit to 1920x1080, fade"]
+        draw --> preview["PROGRAM and CAMERA monitors"]
+        draw --> readback["GPU readback<br/>staging texture"]
+        readback --> writer["Frame channel writer<br/>drop when busy"]
+    end
+
+    writer -->|"shared memory:<br/>3 BGRA slots + event"| channel
+
+    subgraph frameserver["Windows Camera Frame Server"]
+        channel["zlistCamera DLL<br/>Media Foundation source"] --> pick{"New frame?"}
+        pick -->|"yes"| convert["Convert BGRA to NV12<br/>BT.709"]
+        pick -->|"no, under 0.5 s"| repeat["Last frame again"] --> convert
+        pick -->|"no, over 0.5 s"| idle["Placeholder frame"] --> convert
+    end
+
+    convert --> zoom["Meeting app<br/>camera: zlist Camera"]
+```
+
+### Windows sound
+
+Windows has no supported way for an app to add a virtual microphone.
+Thus zlist sends its sound to a loopback cable, for example VB-CABLE. The
+meeting app records from the other end of the cable.
+
+The same `MediaPlayer` that decodes the video also plays its sound. Its
+audio device is the **Send to** device. The microphone relay uses NAudio
+with WASAPI in shared mode. A capture client with a 20 ms buffer writes
+into a ring buffer (NAudio `BufferedWaveProvider`, which uses a circular
+buffer) that holds 500 ms. When the ring buffer is full, new samples are
+discarded. When it is empty, the relay plays silence. Next, the relay
+changes the channel count and the sample rate to the format of the Send
+to device. Then it applies the gain and plays to the cable with 40 ms of
+latency. The Windows audio engine adds the two streams together before
+they go into the cable.
+
+```mermaid
+flowchart TB
+    mic["Microphone"] --> capture["WASAPI capture<br/>shared mode, 20 ms"]
+
+    subgraph app["zlist app"]
+        capture --> ring["Ring buffer<br/>BufferedWaveProvider, 500 ms<br/>full: discard new samples<br/>empty: silence"]
+        ring --> format["Channel and sample rate<br/>conversion"]
+        format --> gain["Gain with 50 ms ramp"]
+        gain --> out["WASAPI render<br/>40 ms latency"]
+        player["MediaPlayer<br/>cue sound"]
+    end
+
+    out --> cable["Send to device<br/>CABLE Input"]
+    player --> cable
+    cable --> cableout["CABLE Output"]
+    cableout --> zoom["Meeting app<br/>microphone: CABLE Output"]
+```
+
+### Timing
+
+zlist does not use one shared clock for sound and picture. The media
+player keeps the sound and the picture of a cue together. The compositor
+then takes the newest frame on its own 30 Hz clock, and the virtual camera
+sends frames on a different 30 Hz clock. These numbers are estimates from
+the design; zlist does not measure them:
+
+- The picture can be approximately one or two frames (33 to 67 ms) late.
+- The microphone relay adds approximately 20 to 250 ms on macOS and 60 to
+  500 ms on Windows.
