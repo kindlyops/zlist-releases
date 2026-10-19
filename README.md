@@ -161,7 +161,7 @@ extension. The extension sends the frame to the meeting app on its source
 stream.
 
 ```mermaid
-flowchart LR
+flowchart TB
     file["Video file"] --> player["AVPlayer"]
     player --> vout["AVPlayerItemVideoOutput<br/>32BGRA, IOSurface"]
     still["Picture file"] --> image["ImageIO decode<br/>once per cue"]
@@ -207,7 +207,7 @@ relay removes the oldest samples. The Core Audio server adds the two
 outputs together before the driver writes them into its ring buffer.
 
 ```mermaid
-flowchart LR
+flowchart TB
     mic["Microphone<br/>set to 48 kHz"] --> inproc["Input IO proc<br/>first channel, mono"]
 
     subgraph app["zlist app"]
@@ -249,7 +249,7 @@ it sends the last frame again for a maximum of 0.5 seconds, and then the
 placeholder.
 
 ```mermaid
-flowchart LR
+flowchart TB
     file["Video file"] --> player["MediaPlayer<br/>frame server mode"]
     still["Picture file"] --> image["Win2D bitmap<br/>decode once per cue"]
     cam["Camera"] --> capture["MediaFrameReader<br/>or DirectShow sample grabber"]
@@ -291,10 +291,11 @@ buffer) that holds 500 ms. When the ring buffer is full, new samples are
 discarded. When it is empty, the relay plays silence. Next, the relay
 changes the channel count and the sample rate to the format of the Send
 to device. Then it applies the gain and plays to the cable with 40 ms of
-latency. Windows adds the two streams together in the cable.
+latency. The Windows audio engine adds the two streams together before
+they go into the cable.
 
 ```mermaid
-flowchart LR
+flowchart TB
     mic["Microphone"] --> capture["WASAPI capture<br/>shared mode, 20 ms"]
 
     subgraph app["zlist app"]
@@ -315,6 +316,10 @@ flowchart LR
 
 zlist does not use one shared clock for sound and picture. The media
 player keeps the sound and the picture of a cue together. The compositor
-then takes the newest frame on its own 30 Hz clock, so the picture can be
-up to approximately two frames (67 ms) late. The microphone relay adds
-approximately 20 to 250 ms on macOS and 60 to 500 ms on Windows.
+then takes the newest frame on its own 30 Hz clock, and the virtual camera
+sends frames on a different 30 Hz clock. These numbers are estimates from
+the design; zlist does not measure them:
+
+- The picture can be approximately one or two frames (33 to 67 ms) late.
+- The microphone relay adds approximately 20 to 250 ms on macOS and 60 to
+  500 ms on Windows.
