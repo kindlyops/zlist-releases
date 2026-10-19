@@ -19,8 +19,6 @@ zlist opens these types of playlist:
 - A folder of video files.
 
 Each item in the playlist is a cue. A cue is a video or a still picture.
-If a playlist refers to a video on the internet, zlist downloads the
-video before it plays.
 
 You can try your own type of playlist. If zlist cannot open it, tell us
 in an [issue](https://github.com/kindlyops/zlist-releases/issues). Also
