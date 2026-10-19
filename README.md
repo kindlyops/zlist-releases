@@ -12,15 +12,19 @@ zlist plays a playlist into a virtual camera and a virtual microphone.
 Zoom, and other meeting apps, can select these devices as a camera and a
 microphone.
 
-zlist opens two types of playlist:
+zlist opens these types of playlist:
 
-- A `.jwlplaylist` export from JW Library.
-- A build folder from `vbs plt build`.
+- A VLC playlist.
+- A Mitti project.
+- A folder of video files.
 
 Each item in the playlist is a cue. A cue is a video or a still picture.
-When zlist opens a `.jwlplaylist`, it downloads the videos for the cues
-from the media server. A video that is in the export plays without a
-download.
+If a playlist refers to a video on the internet, zlist downloads the
+video before it plays.
+
+You can try your own type of playlist. If zlist cannot open it, tell us
+in an [issue](https://github.com/kindlyops/zlist-releases/issues). Also
+tell us about other video players that you want zlist to support.
 
 When no cue plays, the virtual camera sends the picture from your camera.
 The virtual microphone sends the sound from your microphone. When a cue
