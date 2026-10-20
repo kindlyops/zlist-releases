@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>zlist</title>
+<meta name="description" content="zlist plays a video playlist into a virtual camera and microphone that Zoom can pick, and cuts back to your own camera between cues. For macOS and Windows.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="zlist">
+<meta property="og:description" content="Play the video. Cut back to the speaker. A playlist player for live meetings, on macOS and Windows.">
+<meta property="og:image" content="https://kindlyops.github.io/zlist-releases/assets/og.jpg">
+<meta property="og:url" content="https://kindlyops.github.io/zlist-releases/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a night sea under a honey horizon; the console screenshot is the
+   hero's proof, then plain sections set like the app's own labelled panels. */
+:root {
+  color-scheme: dark;
+  /* The SuperComm colours the app and its icon use. */
+  --night: #0e1c27;      /* page: the sea before sunrise */
+  --sea: #1b354a;        /* raised panels */
+  --sea-line: #2c4a61;   /* hairlines on the sea */
+  --console: #1c1917;    /* the app's own dark */
+  --cream: #f7ecd7;      /* text */
+  --mist: #a9bdd0;       /* secondary text, from the icon's sky */
+  --honey: #f0b53f;      /* accent: cued, Play */
+  --honey-deep: #d98e2b;
+  --terracotta: #e07856; /* running over */
+  --sage: #8fbc8f;       /* plenty of time */
+  --live: #c65545;       /* on air */
+  --display: "Big Shoulders Display", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --measure: 66ch;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--cream);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--honey); text-underline-offset: 0.18em; }
+a:hover { color: var(--cream); }
+:focus-visible { outline: 2px solid var(--honey); outline-offset: 3px; border-radius: 4px; }
+
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+}
+
+/* Uppercase labels, the way the app labels PROGRAM and PREVIEW. */
+.label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+}
+h3 { font-size: 1.125rem; font-weight: 700; line-height: 1.3; }
+p { margin: 0; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; overflow: hidden; }
+/* Sky over a horizon, the sun low on the right behind the fish. */
+.hero-top {
+  position: relative;
+  background:
+    radial-gradient(42% 70% at 82% 86%, rgba(240, 181, 63, 0.42), rgba(240, 181, 63, 0) 70%),
+    linear-gradient(180deg, #102434 0%, #1d3a51 84%, #142c3e 84.3%, var(--night) 100%);
+  padding-block: clamp(28px, 5vw, 56px) 0;
+}
+.hero-top::after { /* the column of honey light on the water, from the icon */
+  content: "";
+  position: absolute;
+  left: 82%;
+  top: 84.3%;
+  width: 110px;
+  height: 15.7%;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(180deg, rgba(240, 181, 63, 0.4) 0 3px, transparent 3px 10px);
+  pointer-events: none;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--cream); }
+.brand img { width: 44px; height: 44px; }
+.brand span { font-family: var(--display); font-weight: 800; font-size: 1.9rem; line-height: 1; letter-spacing: 0.01em; }
+.topbar nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.topbar nav a { color: var(--cream); text-decoration: none; font-size: 0.95rem; }
+.topbar nav a:hover { color: var(--honey); }
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 32px;
+  align-items: center;
+  padding-block: clamp(36px, 7vw, 84px) clamp(28px, 4vw, 48px);
+}
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3rem, 9vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: 0.002em;
+}
+.hero h1 em { font-style: normal; color: var(--honey); }
+.lede { margin-top: 22px; max-width: 54ch; font-size: 1.2rem; color: var(--cream); }
+.ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--honey); color: var(--console); }
+.btn-primary:hover { background: #f6c561; color: var(--console); }
+.btn-ghost { border-color: rgba(247, 236, 215, 0.35); color: var(--cream); }
+.btn-ghost:hover { border-color: var(--honey); color: var(--honey); }
+.btn small { font-weight: 400; opacity: 0.8; }
+.req { margin-top: 14px; color: var(--mist); font-size: 0.95rem; }
+.fish { width: 220px; height: auto; justify-self: end; filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35)); }
+
+/* ---------- The console ---------- */
+.console { position: relative; z-index: 1; padding-block: clamp(28px, 4vw, 44px) clamp(48px, 7vw, 88px); }
+.shot {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #3a3330;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  background: var(--console);
+}
+.shot img { display: block; width: 100%; height: auto; }
+.pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--honey);
+  color: var(--console);
+  font: 600 0.8rem/1 var(--mono);
+  box-shadow: 0 0 0 4px rgba(28, 25, 23, 0.7);
+}
+.legend {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 28px;
+}
+.legend li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
+.legend .n {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--honey); color: var(--honey);
+  font: 600 0.8rem/1 var(--mono);
+}
+.legend b { display: block; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.legend span { color: var(--mist); font-size: 0.97rem; }
+
+/* ---------- Sections ---------- */
+section.band { padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--sea-line); }
+.section-head { display: grid; gap: 14px; max-width: var(--measure); margin-bottom: 40px; }
+.section-head p { color: var(--mist); font-size: 1.125rem; }
+
+/* Signal path: what goes where. */
+.path {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+}
+.node { border: 1px solid var(--sea-line); border-radius: 10px; padding: 18px; background: rgba(27, 53, 74, 0.45); min-width: 0; }
+.node.core { background: var(--console); border-color: #3a3330; }
+.node ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.node li { font-size: 0.98rem; }
+.node .dev { font-family: var(--mono); font-size: 0.9rem; color: var(--honey); }
+.arrow { align-self: center; color: var(--honey); font: 600 1.4rem/1 var(--mono); }
+.path-note { margin-top: 18px; color: var(--mist); max-width: var(--measure); }
+.tally { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--live); margin-right: 8px; vertical-align: 1px; }
+
+/* Features: two columns of plain text groups. */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 56px; }
+.feature { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.feature p { color: var(--mist); }
+.feature p strong { color: var(--cream); font-weight: 700; }
+.only {
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--mist); border: 1px solid var(--sea-line); border-radius: 999px; padding: 1px 8px; white-space: nowrap;
+}
+
+/* Sync chart. */
+.sync { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); gap: 48px; align-items: center; }
+.sync .copy { display: grid; gap: 16px; }
+.sync .copy p { color: var(--mist); }
+.chart { background: var(--console); border: 1px solid #3a3330; border-radius: 12px; padding: 18px 18px 12px; min-width: 0; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.chart text { font-family: var(--mono); fill: var(--mist); }
+.chart .row-label { fill: var(--cream); font-size: 13px; }
+.chart .axis { stroke: #57504b; }
+.chart .zero { stroke: var(--cream); stroke-width: 1.5; }
+.chart .frame-band { fill: rgba(143, 188, 143, 0.12); }
+.chart .before { fill: var(--terracotta); }
+.chart .after { fill: var(--sage); }
+.chart-note { margin-top: 10px; font-size: 0.85rem; color: var(--mist); }
+
+/* Platforms. */
+.table-wrap { overflow-x: auto; border: 1px solid var(--sea-line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; min-width: 560px; }
+th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--sea-line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+thead th { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mist); background: rgba(27, 53, 74, 0.5); }
+td:first-child { color: var(--cream); width: 36%; }
+td { color: var(--mist); }
+.yes { color: var(--sage); }
+.soon { color: var(--honey); }
+
+/* Coming next. */
+.next { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.next li { border-left: 3px solid var(--honey); padding: 4px 0 4px 18px; display: grid; gap: 6px; }
+.next p { color: var(--mist); }
+
+/* Install. */
+.install { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.os { border: 1px solid var(--sea-line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.os ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; color: var(--mist); }
+.os ol strong { color: var(--cream); }
+.os code { font-family: var(--mono); font-size: 0.88em; color: var(--cream); overflow-wrap: anywhere; }
+.under { margin-top: 26px; color: var(--mist); max-width: var(--measure); }
+
+footer { border-top: 1px solid var(--sea-line); padding-block: 36px calc(36px + env(safe-area-inset-bottom, 0px)); color: var(--mist); font-size: 0.95rem; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; }
+footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+  .fish { display: none; }
+  .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .path { grid-template-columns: minmax(0, 1fr); }
+  .arrow { justify-self: center; transform: rotate(90deg); }
+  .sync { grid-template-columns: minmax(0, 1fr); }
+  .features, .next, .install { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .legend { grid-template-columns: minmax(0, 1fr); }
+  .pin { width: 20px; height: 20px; font-size: 0.65rem; box-shadow: 0 0 0 2px rgba(28, 25, 23, 0.7); }
+  .topbar nav { gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-top">
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="#top" aria-label="zlist home"><img src="assets/icon-512.png" alt="" width="44" height="44"><span>zlist</span></a>
+      <nav aria-label="Sections">
+        <a href="#features">Features</a>
+        <a href="#sync">Sync</a>
+        <a href="#platforms">Mac and Windows</a>
+        <a href="#install">Install</a>
+      </nav>
+    </div>
+
+    <div class="hero-grid" id="top">
+      <div>
+        <h1>Play the video.<br><em>Cut back to the speaker.</em></h1>
+        <p class="lede">zlist plays a playlist into a virtual camera and microphone that Zoom can pick. Between cues it relays your own camera and microphone, so one operator runs the whole talk.</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="https://github.com/kindlyops/zlist-releases/releases/latest">Download for Mac</a>
+          <a class="btn btn-ghost" href="https://github.com/kindlyops/zlist-releases/releases/latest">Download for Windows <small>x64 and Arm</small></a>
+        </div>
+        <p class="req">macOS 14 or later, Apple silicon and Intel. Windows 11. Works with Zoom and other meeting apps that let you pick a camera and a microphone.</p>
+      </div>
+      <img class="fish" src="assets/icon-512.png" alt="The zlist icon: a flying fish leaping out of the sea at sunrise." width="220" height="220">
+    </div>
+  </div>
+  </div>
+
+  <div class="console">
+    <div class="wrap">
+      <div class="shot">
+        <picture>
+          <source type="image/webp" srcset="assets/console-1200.webp 1200w, assets/console-2000.webp 2000w" sizes="(max-width: 1120px) 100vw, 1088px">
+          <img src="assets/console-1200.jpg" width="1200" height="629" alt="The zlist window with the sample playlist open. PREVIEW shows the welcome card that plays next, PROGRAM shows the presenter's camera, and the cue list below marks the welcome card as NEXT.">
+        </picture>
+        <span class="pin" style="left: 9%; top: 15%;" aria-hidden="true">1</span>
+        <span class="pin" style="left: 31.6%; top: 12.6%;" aria-hidden="true">2</span>
+        <span class="pin" style="left: 51.4%; top: 12.6%;" aria-hidden="true">3</span>
+        <span class="pin" style="left: 93%; top: 26%;" aria-hidden="true">4</span>
+        <span class="pin" style="left: 25.6%; top: 45.8%;" aria-hidden="true">5</span>
+        <span class="pin" style="left: 4.2%; top: 76.5%;" aria-hidden="true">6</span>
+      </div>
+      <ol class="legend" aria-label="What the window shows">
+        <li><span class="n">1</span><div><b>Presentation timer</b><span>A stopwatch for the whole talk, against a planned length or an end time.</span></div></li>
+        <li><span class="n">2</span><div><b>Preview</b><span>What goes to the meeting next. Click it to play.</span></div></li>
+        <li><span class="n">3</span><div><b>Program</b><span>Exactly what the meeting sees, edged in red while a cue is on air.</span></div></li>
+        <li><span class="n">4</span><div><b>Playlist and audio</b><span>Time left in the cues, and meters for your microphone and what the meeting hears.</span></div></li>
+        <li><span class="n">5</span><div><b>Cued and transport</b><span>The next cue, its length, and Previous, Play, Stop, Next and FTB with their keys.</span></div></li>
+        <li><span class="n">6</span><div><b>Cue list</b><span>An arrow joins a cue that runs straight on into the next one.</span></div></li>
+      </ol>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band" aria-labelledby="how">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">How it fits in</span>
+        <h2 id="how">The meeting sees one camera</h2>
+        <p>Pick zlist as the camera and microphone in Zoom once. From then on, what you play in zlist is what the meeting gets.</p>
+      </div>
+      <div class="path">
+        <div class="node">
+          <span class="label">Into zlist</span>
+          <ul>
+            <li>Your camera and microphone</li>
+            <li>Video and picture cues from a playlist</li>
+          </ul>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node core">
+          <span class="label">zlist</span>
+          <ul>
+            <li><span class="tally" aria-hidden="true"></span>A cue on air replaces the camera, and its sound replaces the microphone.</li>
+            <li>Between cues, the camera and microphone go straight through.</li>
+            <li>Everything is fitted into 1920×1080 at 30 frames a second.</li>
+          </ul>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node">
+          <span class="label">Out to the meeting</span>
+          <ul>
+            <li><span class="dev">zlist Camera</span></li>
+            <li><span class="dev">zlist Audio</span> on Mac, a loopback cable such as VB-CABLE on Windows</li>
+          </ul>
+        </div>
+      </div>
+      <p class="path-note">The monitors, clocks and cue list are for you alone. The meeting never sees them.</p>
+    </div>
+  </section>
+
+  <section class="band" id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Features</span>
+        <h2 id="features-title">Made for the person running the talk</h2>
+        <p>The operator also watches the clock, the speaker and the chat. zlist keeps everything else in one window, and out of the meeting.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <h3>Bring the playlist you have</h3>
+          <p><strong>VLC playlists</strong> (<code>.xspf</code>, <code>.m3u</code>, <code>.m3u8</code>) keep each title, and VLC's start and stop times become the part that plays. <strong>Mitti projects</strong> keep cue names, in and out points, and whether a cue holds its last frame or runs on <span class="only">Mac</span>. A <strong>folder</strong> of videos and pictures plays in name order.</p>
+        </div>
+        <div class="feature">
+          <h3>Every talk of the day, ready</h3>
+          <p>Add all of the day's playlists to the sidebar. zlist prepares each one ahead, shows a check mark when it is ready, and opens them all again at the next launch. Click to switch between talks. <span class="only">Mac</span></p>
+        </div>
+        <div class="feature">
+          <h3>Know what goes out next</h3>
+          <p>PROGRAM shows what the meeting sees. PREVIEW shows what comes next: the cued cue, or the camera while a cue plays. The cue clock turns amber at 10 seconds and red at 5, and the playlist clock shows what is left of the talk.</p>
+        </div>
+        <div class="feature">
+          <h3>Cut cleanly</h3>
+          <p>Play, Stop, Next and Previous, or double-click any cue. <strong>FTB</strong> fades picture and sound to black over half a second, and back again. Drag the CUED bar to start a clip later than the playlist says, and PREVIEW shows that frame <span class="only">Mac</span>.</p>
+        </div>
+        <div class="feature">
+          <h3>Sound that follows the picture</h3>
+          <p>Your microphone is live while the camera is on. A cue with sound takes its place and gives it back when it ends; a still or a silent clip leaves the microphone open. Mute never silences a cue. Send the cue sound to headphones or room speakers too.</p>
+        </div>
+        <div class="feature">
+          <h3>Drive it from anywhere</h3>
+          <p>Global hotkeys that work while Zoom is in front, the keyboard's media keys, and <strong>OSC</strong> on UDP port 9000 for Bitfocus Companion and Stream Deck. Each button shows its keys. A second zlist can follow the first over OSC, a set delay later <span class="only">Windows</span>.</p>
+        </div>
+        <div class="feature">
+          <h3>Stay out of the meeting's way</h3>
+          <p><strong>Overlay</strong> mode floats a short strip across the top of the screen and the cue list down one side, so Zoom's gallery stays in view. Keep the window on top and dim it.</p>
+        </div>
+        <div class="feature">
+          <h3>Feed the room as well</h3>
+          <p><strong>External output</strong> sends the meeting's picture to a second display, or to a window of a fixed size for OBS or screen sharing. Choose whether it shows the camera or black between cues.</p>
+        </div>
+        <div class="feature">
+          <h3>Fails safe</h3>
+          <p>If the chosen camera is gone, zlist tries real cameras before capture cards and virtual cameras, and says which one it took. When zlist is closed, the meeting sees a quiet placeholder, never a frozen frame. A cue that cannot play says why in red, and Play refuses it.</p>
+        </div>
+        <div class="feature">
+          <h3>Try it before the talk</h3>
+          <p>Open the sample playlist from the empty cue list: title cards, colour clips, a cue that runs on, and a <strong>Sync test</strong> that flashes and beeps once a second.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="sync" aria-labelledby="sync-title">
+    <div class="wrap sync">
+      <div class="copy">
+        <span class="label">Measured</span>
+        <h2 id="sync-title">Sound and picture land together</h2>
+        <p>A meeting app gets a video frame later than the sound that goes with it. zlist measured the gap with a flash-and-beep clip, recorded the way a meeting app records, and now draws each frame early so the two arrive together.</p>
+        <p>Play the sample's Sync test in a test meeting to check it on your own setup.</p>
+      </div>
+      <figure class="chart" style="margin: 0;">
+        <svg viewBox="0 0 640 230" role="img" aria-labelledby="chart-title chart-desc">
+          <title id="chart-title">Sound minus picture, in milliseconds</title>
+          <desc id="chart-desc">Before the fix, sound arrived 55 to 64 ms early on macOS and 51 to 69 ms early on Windows. Now macOS lands between 17 ms early and 22 ms late, and Windows between 20 ms early and 13 ms late, inside one frame either way.</desc>
+          <!-- x = 170 + (ms + 80) * 3.75 -->
+          <rect class="frame-band" x="345" y="22" width="250" height="168"></rect>
+          <text x="470" y="16" font-size="11" text-anchor="middle">within one frame</text>
+          <line class="axis" x1="170" y1="190" x2="620" y2="190"></line>
+          <g font-size="11" text-anchor="middle">
+            <line class="axis" x1="170" y1="190" x2="170" y2="195"></line><text x="170" y="210">−80</text>
+            <line class="axis" x1="245" y1="190" x2="245" y2="195"></line><text x="245" y="210">−60</text>
+            <line class="axis" x1="320" y1="190" x2="320" y2="195"></line><text x="320" y="210">−40</text>
+            <line class="axis" x1="395" y1="190" x2="395" y2="195"></line><text x="395" y="210">−20</text>
+            <line class="axis" x1="470" y1="190" x2="470" y2="195"></line><text x="470" y="210">0</text>
+            <line class="axis" x1="545" y1="190" x2="545" y2="195"></line><text x="545" y="210">+20</text>
+            <line class="axis" x1="620" y1="190" x2="620" y2="195"></line><text x="606" y="210">+40 ms</text>
+          </g>
+          <text x="170" y="226" font-size="11">sound early</text>
+          <text x="620" y="226" font-size="11" text-anchor="end">sound late</text>
+          <line class="zero" x1="470" y1="22" x2="470" y2="190"></line>
+
+          <text class="row-label" x="0" y="54">macOS, before</text>
+          <rect class="before" x="230" y="43" width="33.75" height="14" rx="3"></rect>
+          <text x="270" y="55" font-size="11">−64 to −55</text>
+
+          <text class="row-label" x="0" y="88">macOS, now</text>
+          <rect class="after" x="406.25" y="77" width="146.25" height="14" rx="3"></rect>
+          <text x="558" y="89" font-size="11">−17 to +22</text>
+
+          <text class="row-label" x="0" y="132">Windows, before</text>
+          <rect class="before" x="211.25" y="121" width="67.5" height="14" rx="3"></rect>
+          <text x="285" y="133" font-size="11">−69 to −51</text>
+
+          <text class="row-label" x="0" y="166">Windows, now</text>
+          <rect class="after" x="395" y="155" width="123.75" height="14" rx="3"></rect>
+          <text x="524" y="167" font-size="11">−20 to +13</text>
+        </svg>
+        <figcaption class="chart-note">By arrival time. macOS: three launches. Windows: the median of each of six launches. One frame at 30 frames a second is 33 ms.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" id="platforms" aria-labelledby="platforms-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Mac and Windows</span>
+        <h2 id="platforms-title">Two native apps, one way of working</h2>
+        <p>The Mac app is written in Swift with a CoreMediaIO camera extension and a Core Audio driver. The Windows app is written in C# and WinUI with a Media Foundation virtual camera. The playlist readers and the transport are the same logic on both, with the same tests.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">What</th><th scope="col">macOS</th><th scope="col">Windows</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Virtual camera</td><td class="yes">zlist Camera</td><td class="yes">zlist Camera</td></tr>
+            <tr><td>Sound to the meeting</td><td class="yes">zlist Audio, a virtual microphone</td><td class="yes">A loopback cable such as VB-CABLE</td></tr>
+            <tr><td>VLC playlists and folders</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Mitti projects</td><td class="yes">Yes</td><td>Open them on a Mac</td></tr>
+            <tr><td>Monitors, clocks, FTB, overlay, external output, presentation timer</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Hotkeys, media keys and OSC</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Playlist sidebar and cued start</td><td class="yes">Yes</td><td class="soon">Coming</td></tr>
+            <tr><td>Lead a second zlist</td><td class="soon">Coming</td><td class="yes">Yes</td></tr>
+            <tr><td>Updates</td><td class="yes">Built in</td><td>Install each new release for now</td></tr>
+            <tr><td>Signature</td><td class="yes">Developer ID, notarized by Apple</td><td>Not signed yet; needs Developer Mode</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="under">Curious how the frames and the sound travel? The <a href="https://github.com/kindlyops/zlist-releases#how-zlist-plays-video-and-sound">technical notes</a> draw the whole path on each platform.</p>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="next-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Coming next</span>
+        <h2 id="next-title">For the control room</h2>
+        <p>These are written and being tested. They are not in a release yet.</p>
+      </div>
+      <ul class="next">
+        <li><h3>Blackmagic DeckLink</h3><p>Send the program picture out of an SDI card, 720p to 2160p, with the meeting's sound on channels 1 and 2. Take an SDI camera in as zlist's camera. Windows first.</p></li>
+        <li><h3>HyperDeck control</h3><p>zlist answers as a HyperDeck, so an ATEM switcher's Auto Roll plays the cued cue on the cut. Windows first.</p></li>
+        <li><h3>Windows catches up</h3><p>The playlist sidebar, the cued start, and a signed installer that updates itself.</p></li>
+        <li><h3>Mac catches up</h3><p>Lead a second zlist over OSC, for a room and a meeting that should see the same cues.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="install" aria-labelledby="install-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Install</span>
+        <h2 id="install-title">Ready in a few minutes</h2>
+        <p>Download the latest release, then pick zlist in your meeting app.</p>
+      </div>
+      <div class="install">
+        <div class="os">
+          <h3>On a Mac</h3>
+          <ol>
+            <li>Download <code>zlist-&lt;version&gt;.zip</code> and move <strong>zlist.app</strong> to Applications.</li>
+            <li>Open zlist and allow the camera and the microphone.</li>
+            <li>Click <strong>Camera</strong> in the toolbar and turn on zlist Camera in System Settings.</li>
+            <li>In Settings ▸ Audio, click <strong>Install</strong> for zlist Audio.</li>
+            <li>In Zoom, pick <strong>zlist Camera</strong> and <strong>zlist Audio</strong>.</li>
+          </ol>
+          <a class="btn btn-primary" href="https://github.com/kindlyops/zlist-releases/releases/latest" style="justify-self: start;">Download for Mac</a>
+        </div>
+        <div class="os">
+          <h3>On Windows 11</h3>
+          <ol>
+            <li>Install <a href="https://vb-audio.com/Cable/">VB-CABLE</a>, and turn on Developer Mode.</li>
+            <li>Download the x64 or Arm zip, extract it, and run <code>install.ps1</code>.</li>
+            <li>Click <strong>Camera</strong> in the toolbar and install zlist Camera.</li>
+            <li>In Settings ▸ Audio ▸ Send to, pick <strong>CABLE Input</strong>.</li>
+            <li>In Zoom, pick <strong>zlist Camera</strong> and <strong>CABLE Output</strong>.</li>
+          </ol>
+          <a class="btn btn-ghost" href="https://github.com/kindlyops/zlist-releases/releases/latest" style="justify-self: start;">Download for Windows</a>
+        </div>
+      </div>
+      <p class="under">Every step, and how to check a download against its <code>SHA256SUMS</code>, is in the <a href="https://github.com/kindlyops/zlist-releases#install-zlist-on-a-mac">install guide</a>. Something not working, or a player you want zlist to read? <a href="https://github.com/kindlyops/zlist-releases/issues">Tell us in an issue</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>zlist is made by Kindly Ops.</span>
+    <nav aria-label="Links">
+      <a href="https://github.com/kindlyops/zlist-releases/releases">Releases</a>
+      <a href="https://github.com/kindlyops/zlist-releases/issues">Issues</a>
+      <a href="https://github.com/kindlyops/zlist-releases#how-zlist-plays-video-and-sound">Technical notes</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
