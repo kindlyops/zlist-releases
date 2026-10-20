@@ -6,6 +6,18 @@
         <description>zlist updates. Rewritten by generate_appcast on every release.</description>
         <language>en</language>
         <item>
+            <title>0.26.0</title>
+            <pubDate>Mon, 19 Oct 2026 22:51:49 -0400</pubDate>
+            <link>https://github.com/kindlyops/zlist-releases/releases</link>
+            <sparkle:version>48</sparkle:version>
+            <sparkle:shortVersionString>0.26.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.26.0/zlist-0.26.0.zip" length="5838507" type="application/octet-stream" sparkle:edSignature="EQ7lVVQNhEAi0MSBy/R2WGU8d+JUGOwKgsPCetklcLpAGcEDG3lPG/sP6veDogkYB9YTaTt2temAyRs7Y1eWAQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.26.0/zlist48-47.delta" sparkle:deltaFrom="47" length="15866" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="gKTxX75yl5RBEPgZHNmmk1gTSGYdW1sFcShoFSTR3gv5hGQk0FREp1wrnk/hCEBxzmcWLcENkkNFQ/FUN15aAA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>0.25.0</title>
             <pubDate>Mon, 19 Oct 2026 22:45:15 -0400</pubDate>
             <link>https://github.com/kindlyops/zlist-releases/releases</link>
@@ -27,18 +39,6 @@
             <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.24.0/zlist-0.24.0.zip" length="5838521" type="application/octet-stream" sparkle:edSignature="6Rr2g16d7/erKpWxDV/HSXkGztO4a77mBnPG3wOrjPPp8RTS5c4nl59Iyk3cCXmdpF0gGdvQt2ZyRkzONVz4AA=="/>
             <sparkle:deltas>
                 <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.24.0/zlist46-45.delta" sparkle:deltaFrom="45" length="2367414" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="CyFccJlmKr2+DqGPvr6tN/VPnvEFxrRzWcsb/ZoIaD2dMxQ+lGQWSz5ba15nJ/orRpvq5nHyytXUy0wlvJdxDw=="/>
-            </sparkle:deltas>
-        </item>
-        <item>
-            <title>0.23.0</title>
-            <pubDate>Mon, 19 Oct 2026 22:10:15 -0400</pubDate>
-            <link>https://github.com/kindlyops/zlist-releases/releases</link>
-            <sparkle:version>45</sparkle:version>
-            <sparkle:shortVersionString>0.23.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.23.0/zlist-0.23.0.zip" length="3528316" type="application/octet-stream" sparkle:edSignature="ArYlU9ziEXh80jKbNSlkiiCYy0Mf+6lYaAeXMjB23eQN/KAlTxBf3EpaqgsIPm+hBiYJFReridhRecQLUrcyBg=="/>
-            <sparkle:deltas>
-                <enclosure url="https://github.com/kindlyops/zlist-releases/releases/download/v0.23.0/zlist45-43.delta" sparkle:deltaFrom="43" length="285998" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="jTxhBhbq9jz6mLZdmppO/Xf0nwLDC0hCWnZLh7UP4chXIzM3BFBhcYxC8ri7v2QHyVhU7NWoF26at4zYmFBhCA=="/>
             </sparkle:deltas>
         </item>
     </channel>
