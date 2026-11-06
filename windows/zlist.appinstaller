@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AppInstaller Uri="https://kindlyops.github.io/zlist-releases/windows/zlist.appinstaller" Version="0.32.1.0" xmlns="http://schemas.microsoft.com/appx/appinstaller/2021">
-  <MainBundle Name="kindlyops.zlist" Publisher="CN=&quot;Kindly Ops, LLC&quot;, O=&quot;Kindly Ops, LLC&quot;, L=St Petersburg, S=Florida, C=US" Version="0.32.1.0" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.1/zlist_0.32.1.msixbundle" />
+<AppInstaller Uri="https://kindlyops.github.io/zlist-releases/windows/zlist.appinstaller" Version="0.32.2.0" xmlns="http://schemas.microsoft.com/appx/appinstaller/2021">
+  <MainBundle Name="kindlyops.zlist" Publisher="CN=&quot;Kindly Ops, LLC&quot;, O=&quot;Kindly Ops, LLC&quot;, L=St Petersburg, S=Florida, C=US" Version="0.32.2.0" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.2/zlist_0.32.2.msixbundle" />
   <Dependencies>
-    <Package Name="Microsoft.WindowsAppRuntime.2" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="2.5.1.0" ProcessorArchitecture="arm64" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.1/Microsoft.WindowsAppRuntime.arm64.msix" />
-    <Package Name="Microsoft.WindowsAppRuntime.2" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="2.5.1.0" ProcessorArchitecture="x64" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.1/Microsoft.WindowsAppRuntime.x64.msix" />
+    <Package Name="Microsoft.WindowsAppRuntime.2" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="2.5.1.0" ProcessorArchitecture="arm64" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.2/Microsoft.WindowsAppRuntime.arm64.msix" />
+    <Package Name="Microsoft.WindowsAppRuntime.2" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="2.5.1.0" ProcessorArchitecture="x64" Uri="https://github.com/kindlyops/zlist-releases/releases/download/v0.32.2/Microsoft.WindowsAppRuntime.x64.msix" />
   </Dependencies>
   <UpdateSettings>
     <OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="true" UpdateBlocksActivation="false" />
