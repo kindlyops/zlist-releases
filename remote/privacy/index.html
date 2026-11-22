@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>zlist Remote Privacy Policy</title>
+<meta name="description" content="zlist Remote collects nothing. It talks only to your own zlist, on your own local network.">
+<link rel="canonical" href="https://kindlyops.github.io/zlist-releases/remote/privacy/">
+<link rel="icon" type="image/png" href="../../assets/favicon-64.png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* The home page's colours and type, set as one plain column of text.
+   Keep the words the same as PRIVACY.md in kindlyops/zlist-ios, which the
+   app shows in Settings. */
+:root {
+  color-scheme: dark;
+  --night: #0e1c27;
+  --sea-line: #2c4a61;
+  --cream: #f7ecd7;
+  --mist: #a9bdd0;
+  --honey: #f0b53f;
+  --display: "Big Shoulders Display", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --measure: 66ch;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--cream);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--honey); text-underline-offset: 0.18em; overflow-wrap: anywhere; }
+a:hover { color: var(--cream); }
+:focus-visible { outline: 2px solid var(--honey); outline-offset: 3px; border-radius: 4px; }
+
+.wrap {
+  max-width: calc(var(--measure) + 32px);
+  margin-inline: auto;
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+}
+
+.topbar { padding-block: clamp(24px, 4vw, 40px) 0; }
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: var(--cream); }
+.brand img { width: 40px; height: 40px; }
+.brand span { font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1; letter-spacing: 0.01em; }
+
+main { padding-block: clamp(32px, 6vw, 64px) clamp(40px, 7vw, 80px); }
+
+.label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+h1, h2 { font-family: var(--display); font-weight: 800; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.6rem, 8vw, 4.2rem); line-height: 0.95; margin-top: 10px; }
+h2 { font-size: clamp(1.6rem, 4vw, 2rem); line-height: 1.05; margin-top: 44px; }
+
+.effective { margin-top: 18px; color: var(--mist); }
+.lede { margin-top: 28px; font-size: 1.2rem; }
+
+p, ul { margin: 14px 0 0; }
+ul { padding-left: 1.2em; }
+li + li { margin-top: 10px; }
+strong { color: var(--cream); }
+
+footer { border-top: 1px solid var(--sea-line); padding-block: 32px calc(32px + env(safe-area-inset-bottom, 0px)); color: var(--mist); font-size: 0.95rem; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header class="wrap topbar">
+  <a class="brand" href="../../" aria-label="zlist home"><img src="../../assets/icon-512.png" alt="" width="40" height="40"><span>zlist</span></a>
+</header>
+
+<main class="wrap">
+  <p class="label">zlist Remote</p>
+  <h1>Privacy Policy</h1>
+  <p class="effective">Effective date: November 21, 2026</p>
+
+  <p class="lede">zlist Remote is a remote control for zlist, the meeting playout app for
+  the Mac, published by Kindly Ops, LLC. It talks only to your own zlist, on your own
+  local network, and never to us.</p>
+
+  <h2>What we collect</h2>
+  <p>Nothing. zlist Remote has no accounts, no analytics, no advertising, no crash
+  reporting, and no servers of its own. We never see what you play, what your playlists
+  hold, or how you use the app.</p>
+
+  <h2>What stays on your device</h2>
+  <ul>
+    <li><strong>Your pairings.</strong> For each Mac you pair with, the app keeps the
+    Mac's name, its zlist id, its network addresses and port, and the key and phone id
+    zlist made for this phone. They are kept in the iOS keychain, on this device only,
+    and are not included in backups to other devices.</li>
+    <li><strong>The phone name</strong> you may type in Settings, kept in the app's
+    settings on this device.</li>
+    <li><strong>Cue pictures</strong> that zlist sends are held in memory while the app
+    runs and are never saved.</li>
+  </ul>
+
+  <h2>What leaves your device</h2>
+  <ul>
+    <li><strong>Messages to your zlist.</strong> The app finds your Mac on the local
+    network with Bonjour and connects to it directly, encrypted with the key from
+    pairing. It sends your commands (play, stop, mute and so on), a keepalive, and the
+    phone name from Settings (or the device model, such as “iPhone”), so zlist can list
+    the phone in its settings. Nothing goes over the internet.</li>
+  </ul>
+
+  <h2>Camera and local network</h2>
+  <ul>
+    <li><strong>Camera.</strong> The camera is used only while you scan zlist's pairing
+    code. No picture is saved or sent anywhere.</li>
+    <li><strong>Local network.</strong> iOS asks before the app may use your local
+    network. Without it the app cannot reach zlist.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>zlist Remote is not directed at children and collects nothing from anyone.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, the new version will be published on this page and in the
+  app, with an updated effective date.</p>
+
+  <h2>Contact</h2>
+  <p>Questions or concerns: email <a href="mailto:support@kindlyops.com">support@kindlyops.com</a>.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>zlist is made by Kindly Ops.</span>
+    <a href="../../">zlist home</a>
+  </div>
+</footer>
+
+</body>
+</html>
