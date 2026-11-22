@@ -263,6 +263,17 @@ td { color: var(--mist); }
 .next li { border-left: 3px solid var(--honey); padding: 4px 0 4px 18px; display: grid; gap: 6px; }
 .next p { color: var(--mist); }
 
+/* Phone remote beta. */
+.remote { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr); gap: 48px; align-items: start; }
+.remote .copy { display: grid; gap: 16px; }
+.remote .copy p, .remote ul { color: var(--mist); }
+.remote ul { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+.remote ul strong { color: var(--cream); }
+.join { border: 1px solid var(--sea-line); border-radius: 12px; padding: 24px; display: grid; gap: 16px; justify-items: center; text-align: center; background: rgba(27, 53, 74, 0.45); }
+.join .qr { width: 100%; max-width: 220px; height: auto; aspect-ratio: 1; border-radius: 8px; background: #fff; }
+.join p { color: var(--mist); font-size: 0.95rem; }
+.join .url { font-family: var(--mono); font-size: 0.85rem; overflow-wrap: anywhere; }
+
 /* Install. */
 .install { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
 .os { border: 1px solid var(--sea-line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; align-content: start; min-width: 0; }
@@ -282,7 +293,7 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
   .path { grid-template-columns: minmax(0, 1fr); }
   .arrow { justify-self: center; transform: rotate(90deg); }
   .sync { grid-template-columns: minmax(0, 1fr); }
-  .features, .next, .install { grid-template-columns: minmax(0, 1fr); }
+  .features, .next, .install, .remote { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .legend { grid-template-columns: minmax(0, 1fr); }
@@ -302,6 +313,7 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
         <a href="#features">Features</a>
         <a href="#sync">Sync</a>
         <a href="#platforms">Mac and Windows</a>
+        <a href="#remote">Phone remote</a>
         <a href="#install">Install</a>
       </nav>
     </div>
@@ -515,6 +527,34 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
         </table>
       </div>
       <p class="under">Curious how the frames and the sound travel? The <a href="https://github.com/kindlyops/zlist-releases#how-zlist-plays-video-and-sound">technical notes</a> draw the whole path on each platform.</p>
+    </div>
+  </section>
+
+  <section class="band" id="remote" aria-labelledby="remote-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">zlist Remote · beta</span>
+        <h2 id="remote-title">Run the playlist from your phone</h2>
+        <p>zlist Remote for iPhone and iPad is in beta on TestFlight. Walk the room, or sit with the speaker, and still run the show.</p>
+      </div>
+      <div class="remote">
+        <div class="copy">
+          <ul>
+            <li><strong>Run the cues.</strong> Switch playlists, cue any cue, play and stop, or swipe a cue to play it now.</li>
+            <li><strong>See the clocks.</strong> The on-air countdown and its bar, the playlist clock, and the presentation timer with its end time.</li>
+            <li><strong>Work the picture.</strong> Fade to black, mute the microphone, turn the camera off, and put graphics on and off.</li>
+            <li><strong>Paired, not open.</strong> Scan a code from zlist once. Each phone gets its own key, the connection is encrypted, and it stays on your local network.</li>
+          </ul>
+          <p>You need zlist 0.43 or later on a Mac, and an iPhone or iPad with iOS 18 or later on the same network. In zlist, turn on Settings ▸ Remote ▸ <strong>Allow remote control</strong>, press <strong>Pair a Phone…</strong>, and scan the code. The Windows version of zlist does not work with the remote yet.</p>
+          <p>The app collects nothing; see the <a href="remote/privacy/">privacy policy</a>.</p>
+        </div>
+        <div class="join">
+          <img class="qr" src="assets/testflight-qr.svg" width="220" height="220" alt="QR code that opens the zlist Remote beta on TestFlight">
+          <p>Scan with your iPhone's camera to join the beta. TestFlight, Apple's beta app, installs zlist Remote.</p>
+          <a class="btn btn-primary" href="https://testflight.apple.com/join/XZPkjkjU">Join the beta on TestFlight</a>
+          <a class="url" href="https://testflight.apple.com/join/XZPkjkjU">testflight.apple.com/join/XZPkjkjU</a>
+        </div>
+      </div>
     </div>
   </section>
 
